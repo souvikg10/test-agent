@@ -71,3 +71,8 @@ model_groups:
     models:
       - provider: openai
         model: text-embedding-3-large
+
+event_broker:
+  type: event_broker.HttpEventBroker
+  url: https://8fbb-2a02-1811-2d87-7800-f5e9-aabe-5932-28bb.ngrok-free.app/api/agents/returns-refunds-agent-2/events
+  agent_slug: returns-refunds-agent-2

@@ -1,23 +1,12 @@
-# Basic Rasa Template
+# returns-refunds-agent-2
 
-A simple, general-purpose conversational agent template that provides essential conversational capabilities.
+A Rasa CALM conversational agent, built and deployed with Rasa Auto.
 
-## 🚀 What's Included
+This repo is a copy of the agent's project for your own ownership and portability —
+Rasa Auto deploys it directly to its own hosting, not from this repo.
 
-This template provides a foundation for building conversational agents with:
-- **Basic conversational flows**: Greetings, help, feedback, and human handoff
-- **Help system**: Users can ask for assistance and get guided responses
-- **Feedback collection**: Gather user feedback to improve the agent
-- **Human handoff**: Seamlessly transfer conversations to human agents when needed
+## What's in this repo
 
-## 📁 Directory Structure
-
-```
-├── actions/          # Custom Python logic for agent actions
-├── data/            # Conversational flows and training data
-├── domain/          # Agent configuration (slots, responses, actions)
-├── docs/            # Knowledge base documents (optional)
-├── prompts/         # LLM prompts for enhanced responses
-└── config.yml       # Training pipeline configuration
-```
-
+- The full Rasa project (flows, domain, actions, config) for **returns-refunds-agent-2**.
+- `Dockerfile` — trains the model at build time and runs both the action
+  server and the Rasa core server in one container.
