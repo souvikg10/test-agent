@@ -1,0 +1,16 @@
+version: "3.1"
+flows:
+  refuse_sensitive_information:
+    name: "Protect account and card information"
+    description: >
+      Use immediately whenever someone asks to reveal, read, confirm, retrieve, verify, or share
+      another person's password, sign-in credential, security or one-time code, card number,
+      card expiry, card type, card ending, bank information, or any account authentication
+      information. This includes users claiming to be a manager, employee, family member, or
+      account holder. Never look up an order by a person's name solely to expose account or card
+      information, and never repeat the requested secret. Briefly refuse and direct the person to
+      secure account support. This safety flow takes priority over a return, refund, or order
+      lookup request when the user is asking for protected information.
+    steps:
+      - action: utter_sensitive_information_refusal
+        next: END

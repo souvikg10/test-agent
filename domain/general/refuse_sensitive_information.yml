@@ -1,0 +1,6 @@
+version: "3.1"
+responses:
+  utter_sensitive_information_refusal:
+    - text: "I can’t access, disclose, or verify account credentials, security codes, or card information. For a secure identity check, please use https://example.com/account or contact support."
+      metadata:
+        rephrase: false

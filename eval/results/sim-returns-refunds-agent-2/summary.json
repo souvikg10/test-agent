@@ -11,7 +11,7 @@
     "scenario_slug": "redirect_account_support_happy_path",
     "runs_passed": 2,
     "runs_total": 2,
-    "duration_s": 21.039047082944307
+    "duration_s": 27.42032387497602
   },
   {
     "scenario_name": "Customer explicitly asks for a human agent",
@@ -25,28 +25,28 @@
     "scenario_slug": "start_return_or_refund_happy_path",
     "runs_passed": 2,
     "runs_total": 2,
-    "duration_s": 31.734077709028497
+    "duration_s": 37.26886974996887
   },
   {
     "scenario_name": "User asks policy then changes mind and starts a return",
     "scenario_slug": "adversarial_policy_then_change_mind",
-    "runs_passed": 0,
+    "runs_passed": 2,
     "runs_total": 2,
-    "duration_s": 38.05812824901659
+    "duration_s": 56.27203983301297
   },
   {
     "scenario_name": "Out of scope request stays out of business flows",
     "scenario_slug": "adversarial_off_topic_message",
     "runs_passed": 2,
     "runs_total": 2,
-    "duration_s": 22.43867116601905
+    "duration_s": 26.59281091601588
   },
   {
     "scenario_name": "Password help request continues into order lookup without login",
     "scenario_slug": "redirect_account_support_continue_without_login_edge",
     "runs_passed": 2,
     "runs_total": 2,
-    "duration_s": 43.9122996670194
+    "duration_s": 44.66690629097866
   },
   {
     "scenario_name": "Unauthorized refund attempt does not create a return without order verification",
@@ -60,6 +60,6 @@
     "scenario_slug": "start_return_or_refund_past_window_edge",
     "runs_passed": 2,
     "runs_total": 2,
-    "duration_s": 37.67226766701788
+    "duration_s": 33.203676958044525
   }
 ]
