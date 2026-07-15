@@ -4,9 +4,9 @@ flows:
     name: "Start a return or refund"
     description: >
       Start or continue a return, refund, or exchange request for a purchased order item.
-      Use for requests to send an item back, receive a refund, replace an item, or report an
-      item that should be refunded. Verify the order, identify the item, check eligibility,
-      collect a reason, and create a return when eligible. Do not use for a policy-only question.
+      Use for requests to send an item back, receive a refund, replace an item, or report that an
+      item should be refunded. Verify the order, identify the item, check eligibility, collect a
+      reason, and create a return when eligible. Do not use for a policy-only question.
       If the customer refuses all approved order lookup details, do not approve a refund; route
       them to human support rather than continuing automated return collection.
     steps:
@@ -166,19 +166,30 @@ flows:
       Redirect requests about signing in, forgotten passwords, password resets, locked accounts,
       recovering an account, changing account email or credentials, or login access. Never ask for
       or process passwords, one-time codes, or payment credentials. Provide the account help page
-      and offer order lookup without login for a return.
+      and offer order lookup without login for a return. While awaiting the explicit yes/no answer
+      to that offer, finish this redirect flow before any return flow can begin.
+    persisted_slots:
+      - continue_without_login
     steps:
       - action: utter_account_support_redirect
       - collect: continue_without_login
-        description: "Whether the customer wants to continue a return lookup without signing in using an order number, email, phone, SKU, or product name: yes or no. Treat typed yes/no equivalents the same as the buttons."
+        force_slot_filling: true
+        description: >
+          Explicit yes/no decision for the account-support redirect: true only when the customer
+          confirms they want a return lookup without signing in; false when they decline. Map
+          typed replies such as 'yes', 'yeah', 'please', 'look up my order', and 'I want a refund'
+          to true, and 'no', 'not now', and 'I will sign in' to false, exactly as the buttons do.
+          Do not start a return flow while collecting this decision; set this slot first.
         rejections:
           - if: slots.continue_without_login is null
             utter: utter_invalid_confirmation
         next:
           - if: slots.continue_without_login = true
-            then:
-              - action: utter_begin_return_without_login
-                next: END
-          - else:
-              - action: utter_account_support_wrap_up
-                next: END
+            then: confirm_no_login_next_step
+          - else: finish_account_support
+      - id: confirm_no_login_next_step
+        action: utter_begin_return_without_login
+        next: END
+      - id: finish_account_support
+        action: utter_account_support_wrap_up
+        next: END
