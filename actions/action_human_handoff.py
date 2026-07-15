@@ -1,40 +1,21 @@
 from typing import Any, Dict, List, Text
 
-import openai
 from rasa_sdk import Action, Tracker
+from rasa_sdk.events import SlotSet
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.types import DomainDict
 
 
-class ActionHumanHandoff(Action):
+class ActionMockRouteHumanSupport(Action):
+    # MOCK — replace once a real MCP server for human-support-routing is registered.
     def name(self) -> Text:
-        return "action_human_handoff"
+        return "action_mock_route_human_support"
 
-    async def run(
-        self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict
-    ) -> List[Dict[Text, Any]]:
-        convo: List[str] = []
-        for event in tracker.events:
-            if event.get("event") == "user":
-                user_text = str(event.get("text") or "")
-                convo.append(f"user - {user_text}")
-            elif event.get("event") == "bot":
-                bot_text = str(event.get("text") or "")
-                convo.append(f"bot - {bot_text}")
-        prompt = (
-            f"The following is a conversation between a bot and a human user. "
-            f"Please summarise so that a human agent can easily understand the "
-            f"important context. Conversation: "
-            f"{convo}"
-        )
-        response = openai.chat.completions.create(
-            model="gpt-4o",
-            messages=[{"role": "user", "content": prompt}],
-        )
-        summarised_conversation = (
-            response.choices[0].message.content or "No summary available"
-        )
-        dispatcher.utter_message(
-            response="utter_transfer_to_manager", summary=summarised_conversation
-        )
-        return []
+    async def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict) -> List[Dict[Text, Any]]:
+        order_id = tracker.get_slot("order_id") or "not provided"
+        item = tracker.get_slot("return_item") or "not provided"
+        reason = tracker.get_slot("return_reason") or "not provided"
+        eligibility = tracker.get_slot("return_eligibility") or "not checked"
+        ticket_id = f"SUP-{str(order_id)[-4:].upper() if order_id != 'not provided' else '1001'}"
+        summary = f"Order: {order_id}; item: {item}; reason: {reason}; eligibility: {eligibility}."
+        return [SlotSet("handoff_ticket_id", ticket_id), SlotSet("handoff_summary", summary)]

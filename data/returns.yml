@@ -1,0 +1,169 @@
+version: "3.1"
+flows:
+  start_return_or_refund:
+    name: "Start a return or refund"
+    description: >
+      Start or continue a return, refund, or exchange request for a purchased order item.
+      Use for requests to send an item back, receive a refund, replace an item, or report an
+      item that should be refunded. Verify the order, identify the item, check eligibility,
+      collect a reason, and create a return when eligible. Do not use for a policy-only question.
+    steps:
+      - id: choose_lookup_method
+        collect: order_lookup_method
+        description: "Preferred order lookup method: order_number if available, otherwise fallback_details for email, phone, SKU, or product name."
+        rejections:
+          - if: slots.order_lookup_method is null
+            utter: utter_invalid_lookup_method
+        next:
+          - if: slots.order_lookup_method = "order_number"
+            then: collect_order_number
+          - else: collect_fallback_details
+      - id: collect_order_number
+        collect: order_id
+        description: "Order number from the purchase confirmation or order history, usually a short alphanumeric identifier; accept phrases such as 'my order is 12345'."
+        rejections:
+          - if: slots.order_id is null
+            utter: utter_invalid_order_id
+        next: lookup_order
+      - id: collect_fallback_details
+        collect: fallback_lookup_details
+        description: "One or more approved order lookup details: email address, phone number, SKU, or product name. Never collect a password, payment card number, or verification code."
+        rejections:
+          - if: slots.fallback_lookup_details is null
+            utter: utter_invalid_fallback_details
+        next: lookup_order
+      - id: lookup_order
+        action: action_mock_lookup_order
+        next:
+          - if: slots.order_lookup_status = "matched"
+            then: show_order_match
+          - if: slots.order_lookup_status = "multiple_matches"
+            then: multiple_order_matches
+          - if: slots.order_lookup_failure_count < 2
+            then: retry_lookup
+          - else: lookup_handoff
+      - id: show_order_match
+        action: utter_order_match
+      - id: collect_return_item
+        collect: return_item
+        description: "The exact order line item to return, supplied as an item name, SKU, line number, or selection; distinguish duplicate items and include quantity when relevant."
+        rejections:
+          - if: slots.return_item is null
+            utter: utter_invalid_return_item
+      - id: check_eligibility
+        action: action_mock_check_return_eligibility
+        next:
+          - if: slots.return_eligibility = "eligible"
+            then: collect_return_reason
+          - if: slots.return_eligibility = "already_refunded"
+            then: already_refunded
+          - if: slots.return_eligibility = "open_return"
+            then: open_return
+          - if: slots.return_eligibility = "past_window"
+            then: past_return_window
+          - else: eligibility_handoff
+      - id: collect_return_reason
+        collect: return_reason
+        description: "Reason for the return or refund: damaged, defective, wrong_item, wrong_size, changed_mind, duplicate_purchase, or other. Map free text such as 'it arrived broken' to damaged."
+        rejections:
+          - if: slots.return_reason is null
+            utter: utter_invalid_return_reason
+      - id: confirm_return
+        collect: return_confirmation
+        description: "Whether the customer confirms the identified item and return reason: yes or no."
+        rejections:
+          - if: slots.return_confirmation is null
+            utter: utter_invalid_confirmation
+        next:
+          - if: slots.return_confirmation = true
+            then: create_return
+          - else:
+              - action: utter_return_cancelled
+                next: END
+      - id: create_return
+        action: action_mock_create_return
+        next:
+          - if: slots.return_creation_status = "created"
+            then: return_created
+          - else: creation_handoff
+      - id: return_created
+        action: utter_return_created
+      - id: retry_lookup
+        collect: retry_order_lookup
+        description: "Whether the customer wants to try order lookup again with different order or fallback details: yes or no."
+        rejections:
+          - if: slots.retry_order_lookup is null
+            utter: utter_invalid_confirmation
+        next:
+          - if: slots.retry_order_lookup = true
+            then:
+              - set_slots:
+                  - order_id: null
+                  - fallback_lookup_details: null
+                next: choose_lookup_method
+          - else: lookup_handoff
+      - id: multiple_order_matches
+        action: utter_multiple_order_matches
+        next: lookup_handoff
+      - id: already_refunded
+        action: utter_already_refunded
+      - id: open_return
+        action: utter_open_return
+      - id: past_return_window
+        action: utter_past_return_window
+        next: eligibility_handoff
+      - id: lookup_handoff
+        link: human_handoff
+      - id: eligibility_handoff
+        link: human_handoff
+      - id: creation_handoff
+        link: human_handoff
+
+  answer_return_policy_question:
+    name: "Answer return and refund policy questions"
+    description: >
+      Answer a quick informational question about return or refund policy only: return window,
+      refund timing, required order information or materials, return labels and shipping, item
+      condition, or the general return process. Use this without creating or changing a return.
+      It may answer an interruption during a return flow before that flow resumes.
+    steps:
+      - collect: policy_topic
+        description: "Return-policy topic: refund_timing, return_window, requirements, shipping_label, item_condition, or general_process."
+        rejections:
+          - if: slots.policy_topic is null
+            utter: utter_ask_policy_topic_again
+      - action: utter_return_policy_answer
+      - collect: continue_return
+        description: "Whether the customer wants to continue or start a return after the policy answer: yes or no."
+        rejections:
+          - if: slots.continue_return is null
+            utter: utter_invalid_confirmation
+        next:
+          - if: slots.continue_return = true
+            then:
+              - link: start_return_or_refund
+          - else:
+              - action: utter_policy_wrap_up
+                next: END
+
+  redirect_account_support:
+    name: "Redirect login or password support"
+    description: >
+      Redirect requests about signing in, forgotten passwords, password resets, locked accounts,
+      recovering an account, changing account email or credentials, or login access. Never ask for
+      or process passwords, one-time codes, or payment credentials. Provide the account help page
+      and offer order lookup without login for a return.
+    steps:
+      - action: utter_account_support_redirect
+      - collect: continue_without_login
+        description: "Whether the customer wants to continue a return lookup without signing in using an order number, email, phone, SKU, or product name: yes or no."
+        rejections:
+          - if: slots.continue_without_login is null
+            utter: utter_invalid_confirmation
+        next:
+          - if: slots.continue_without_login = true
+            then:
+              - link: start_return_or_refund
+          - else:
+              - action: utter_account_support_wrap_up
+                next: END

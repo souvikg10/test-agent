@@ -1,0 +1,63 @@
+from typing import Any, Dict, List, Text
+
+from rasa_sdk import Action, Tracker
+from rasa_sdk.events import SlotSet
+from rasa_sdk.executor import CollectingDispatcher
+from rasa_sdk.types import DomainDict
+
+
+class ActionMockLookupOrder(Action):
+    """Mock order lookup; replace once a real MCP server for order-management-mcp is registered."""
+
+    def name(self) -> Text:
+        return "action_mock_lookup_order"
+
+    async def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict) -> List[Dict[Text, Any]]:
+        order_id = str(tracker.get_slot("order_id") or "").strip().lower()
+        fallback = str(tracker.get_slot("fallback_lookup_details") or "").strip().lower()
+        failures = float(tracker.get_slot("order_lookup_failure_count") or 0)
+        key = order_id or fallback
+        if not key or "nomatch" in key or key.endswith("0000"):
+            return [SlotSet("order_lookup_status", "no_match"), SlotSet("order_lookup_failure_count", failures + 1)]
+        if "multiple" in key or key.endswith("1111"):
+            return [SlotSet("order_lookup_status", "multiple_matches"), SlotSet("order_lookup_failure_count", failures + 1)]
+        summary = f"order {order_id.upper()} with a Blue Hoodie and Everyday Sneakers" if order_id else "an order matching the details you provided with a Blue Hoodie and Everyday Sneakers"
+        return [SlotSet("order_lookup_status", "matched"), SlotSet("matched_order_summary", summary), SlotSet("order_lookup_failure_count", 0)]
+
+
+class ActionMockCheckReturnEligibility(Action):
+    """Mock eligibility check; replace once a real MCP server for order-management-mcp is registered."""
+
+    def name(self) -> Text:
+        return "action_mock_check_return_eligibility"
+
+    async def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict) -> List[Dict[Text, Any]]:
+        order_id = str(tracker.get_slot("order_id") or "").lower()
+        item = str(tracker.get_slot("return_item") or "").lower()
+        key = f"{order_id} {item}"
+        if order_id.endswith("9999") or "past window" in key:
+            result = "past_window"
+        elif order_id.endswith("8888") or "already refunded" in key:
+            result = "already_refunded"
+        elif order_id.endswith("7777") or "open return" in key:
+            result = "open_return"
+        elif "final sale" in key:
+            result = "restricted"
+        else:
+            result = "eligible"
+        return [SlotSet("return_eligibility", result)]
+
+
+class ActionMockCreateReturn(Action):
+    """Mock return creation; replace once a real MCP server for order-management-mcp is registered."""
+
+    def name(self) -> Text:
+        return "action_mock_create_return"
+
+    async def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict) -> List[Dict[Text, Any]]:
+        order_id = str(tracker.get_slot("order_id") or "fallback").upper()
+        item = str(tracker.get_slot("return_item") or "item").lower()
+        if "creation failure" in item or order_id.endswith("6666"):
+            return [SlotSet("return_creation_status", "failed")]
+        authorization = f"RA-{order_id[-4:] if len(order_id) >= 4 else '1001'}"
+        return [SlotSet("return_creation_status", "created"), SlotSet("return_authorization", authorization)]

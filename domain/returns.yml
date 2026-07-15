@@ -1,0 +1,180 @@
+version: "3.1"
+slots:
+  order_lookup_method:
+    type: categorical
+    values: [order_number, fallback_details]
+    mappings:
+      - type: from_llm
+  order_id:
+    type: text
+    mappings:
+      - type: from_llm
+  fallback_lookup_details:
+    type: text
+    mappings:
+      - type: from_llm
+  order_lookup_status:
+    type: categorical
+    values: [matched, no_match, multiple_matches, error]
+    mappings:
+      - type: controlled
+  order_lookup_failure_count:
+    type: float
+    initial_value: 0
+    mappings:
+      - type: controlled
+  matched_order_summary:
+    type: text
+    mappings:
+      - type: controlled
+  return_item:
+    type: text
+    mappings:
+      - type: from_llm
+  return_reason:
+    type: categorical
+    values: [damaged, defective, wrong_item, wrong_size, changed_mind, duplicate_purchase, other]
+    mappings:
+      - type: from_llm
+  return_eligibility:
+    type: categorical
+    values: [eligible, past_window, already_refunded, open_return, restricted]
+    mappings:
+      - type: controlled
+  return_confirmation:
+    type: bool
+    mappings:
+      - type: from_llm
+  retry_order_lookup:
+    type: bool
+    mappings:
+      - type: from_llm
+  return_creation_status:
+    type: categorical
+    values: [created, failed]
+    mappings:
+      - type: controlled
+  return_authorization:
+    type: text
+    mappings:
+      - type: controlled
+  policy_topic:
+    type: categorical
+    values: [refund_timing, return_window, requirements, shipping_label, item_condition, general_process]
+    mappings:
+      - type: from_llm
+  continue_return:
+    type: bool
+    mappings:
+      - type: from_llm
+  continue_without_login:
+    type: bool
+    mappings:
+      - type: from_llm
+  handoff_ticket_id:
+    type: text
+    mappings:
+      - type: controlled
+  handoff_summary:
+    type: text
+    mappings:
+      - type: controlled
+
+actions:
+  - action_mock_lookup_order
+  - action_mock_check_return_eligibility
+  - action_mock_create_return
+  - action_mock_route_human_support
+
+responses:
+  utter_ask_order_lookup_method:
+    - text: "To find the order, do you have the order number? You can copy it from the confirmation email or order history."
+      buttons:
+        - title: "I have the order number"
+          payload: "/SetSlots(order_lookup_method=order_number)"
+        - title: "Look it up another way"
+          payload: "/SetSlots(order_lookup_method=fallback_details)"
+  utter_invalid_lookup_method:
+    - text: "Please choose order number or another lookup method."
+  utter_ask_order_id:
+    - text: "Please copy-paste the order number from your confirmation email or order history."
+  utter_invalid_order_id:
+    - text: "Please send the order number, or choose another lookup method."
+  utter_ask_fallback_lookup_details:
+    - text: "Please share the email or phone used for the order, or the SKU/product name. Don’t send a password, card number, or verification code."
+  utter_invalid_fallback_details:
+    - text: "Please provide an email, phone number, SKU, or product name—never a password or payment details."
+  utter_order_match:
+    - text: "I found {matched_order_summary}. Which item would you like to return or refund?"
+  utter_multiple_order_matches:
+    - text: "I found more than one possible order and can’t safely choose between them. A support specialist can verify it with you."
+  utter_ask_return_item:
+    - text: "Which item is this for? You can type the item name, SKU, or line number."
+  utter_invalid_return_item:
+    - text: "Please provide the item name, SKU, or line number from the order."
+  utter_ask_return_reason:
+    - text: "What’s the reason? For example: damaged, wrong item, wrong size, defective, changed mind, or duplicate purchase."
+  utter_invalid_return_reason:
+    - text: "Please share a return reason, such as damaged, wrong item, wrong size, defective, changed mind, or other."
+  utter_ask_return_confirmation:
+    - text: "Please confirm: return {return_item} because it was {return_reason}?"
+      buttons:
+        - title: "Yes, create return"
+          payload: "/SetSlots(return_confirmation=true)"
+        - title: "No, cancel"
+          payload: "/SetSlots(return_confirmation=false)"
+  utter_invalid_confirmation:
+    - text: "Please reply yes or no."
+  utter_return_cancelled:
+    - text: "No return was created."
+  utter_already_refunded:
+    - text: "That item was already refunded, so I can’t create a duplicate return. Your original refund should appear on the payment method within 5–10 business days."
+  utter_open_return:
+    - text: "There is already an open return for that item. Please use the existing return authorization rather than creating another one."
+  utter_past_return_window:
+    - text: "This item appears to be outside the 30-day return window. If you believe that is incorrect or the item is defective, I can connect you with support."
+  utter_return_created:
+    - text: "Your return is created: authorization {return_authorization}. Use the return label from your order email or account. Once received and inspected, refunds typically post in 5–10 business days."
+  utter_ask_retry_order_lookup:
+    - text: "I couldn’t find a matching order. Would you like to try again with different details?"
+      buttons:
+        - title: "Try again"
+          payload: "/SetSlots(retry_order_lookup=true)"
+        - title: "Contact support"
+          payload: "/SetSlots(retry_order_lookup=false)"
+  utter_ask_policy_topic:
+    - text: "What would you like to know: refund timing, return window, what you need, labels/shipping, item condition, or the general process?"
+  utter_ask_policy_topic_again:
+    - text: "Please choose a policy topic: refund timing, return window, requirements, shipping label, item condition, or general process."
+  utter_return_policy_answer:
+    - condition: slots.policy_topic = "refund_timing"
+      text: "After a return is received and inspected, refunds typically post to the original payment method in 5–10 business days."
+    - condition: slots.policy_topic = "return_window"
+      text: "Most items can be returned within 30 days of delivery, subject to item-level exceptions."
+    - condition: slots.policy_topic = "requirements"
+      text: "Have the order number and item ready. Include the item and any included parts; the original packaging is helpful when available."
+    - condition: slots.policy_topic = "shipping_label"
+      text: "After approval, use the return authorization and label provided with your order or in your account."
+    - condition: slots.policy_topic = "item_condition"
+      text: "Items should be in returnable condition with included parts. Damaged, defective, or incorrect items may be reviewed as exceptions."
+    - text: "Start a return by locating the order, selecting the item and reason, then confirming the request. Eligible returns receive an authorization and next steps."
+  utter_ask_continue_return:
+    - text: "Would you like to continue or start a return now?"
+      buttons:
+        - title: "Yes"
+          payload: "/SetSlots(continue_return=true)"
+        - title: "No"
+          payload: "/SetSlots(continue_return=false)"
+  utter_policy_wrap_up:
+    - text: "Glad to help."
+  utter_account_support_redirect:
+    - text: "For sign-in or password help, please use the account page: https://example.com/account. Don’t send passwords or verification codes here. You can still look up a return without signing in."
+  utter_ask_continue_without_login:
+    - text: "Would you like to look up a return without signing in?"
+      buttons:
+        - title: "Yes, look up my order"
+          payload: "/SetSlots(continue_without_login=true)"
+        - title: "No"
+          payload: "/SetSlots(continue_without_login=false)"
+  utter_account_support_wrap_up:
+    - text: "Once you have access, you can return here for help with an order."
