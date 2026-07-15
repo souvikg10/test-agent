@@ -85,6 +85,7 @@ actions:
   - action_mock_check_return_eligibility
   - action_mock_create_return
   - action_mock_route_human_support
+  - validate_fallback_lookup_details
 
 responses:
   utter_ask_order_lookup_method:
@@ -104,6 +105,8 @@ responses:
     - text: "Please share the email or phone used for the order, or the SKU/product name. Don’t send a password, card number, or verification code."
   utter_invalid_fallback_details:
     - text: "Please provide an email, phone number, SKU, or product name—never a password or payment details."
+  utter_sensitive_lookup_details:
+    - text: "For your security, I can’t accept passwords, verification codes, or payment card details. Use https://example.com/account for account access, then share only an order number, email, phone, SKU, or product name here."
   utter_order_match:
     - text: "I found {matched_order_summary}. Which item would you like to return or refund?"
   utter_multiple_order_matches:
@@ -133,6 +136,8 @@ responses:
     - text: "There is already an open return for that item. Please use the existing return authorization rather than creating another one."
   utter_past_return_window:
     - text: "This item appears to be outside the 30-day return window. If you believe that is incorrect or the item is defective, I can connect you with support."
+  utter_restricted_return_item:
+    - text: "This item has a return restriction, so I can’t create an automatic return. A support specialist can review any applicable exception."
   utter_return_created:
     - text: "Your return is created: authorization {return_authorization}. Use the return label from your order email or account. Once received and inspected, refunds typically post in 5–10 business days."
   utter_ask_retry_order_lookup:

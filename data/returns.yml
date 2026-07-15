@@ -10,7 +10,7 @@ flows:
     steps:
       - id: choose_lookup_method
         collect: order_lookup_method
-        description: "Preferred order lookup method: order_number if available, otherwise fallback_details for email, phone, SKU, or product name."
+        description: "Preferred order lookup method: order_number if available, otherwise fallback_details for email, phone, SKU, or product name. Treat typed phrases such as 'my order is 12345' as order_number and 'look it up by my email' as fallback_details."
         rejections:
           - if: slots.order_lookup_method is null
             utter: utter_invalid_lookup_method
@@ -27,7 +27,7 @@ flows:
         next: lookup_order
       - id: collect_fallback_details
         collect: fallback_lookup_details
-        description: "One or more approved order lookup details: email address, phone number, SKU, or product name. Never collect a password, payment card number, or verification code."
+        description: "One or more approved order lookup details: email address, phone number, SKU, or product name. Never accept a password, payment card number, or verification code."
         rejections:
           - if: slots.fallback_lookup_details is null
             utter: utter_invalid_fallback_details
@@ -61,16 +61,18 @@ flows:
             then: open_return
           - if: slots.return_eligibility = "past_window"
             then: past_return_window
+          - if: slots.return_eligibility = "restricted"
+            then: restricted_item
           - else: eligibility_handoff
       - id: collect_return_reason
         collect: return_reason
-        description: "Reason for the return or refund: damaged, defective, wrong_item, wrong_size, changed_mind, duplicate_purchase, or other. Map free text such as 'it arrived broken' to damaged."
+        description: "Reason for the return or refund: damaged, defective, wrong_item, wrong_size, changed_mind, duplicate_purchase, or other. Map free text such as 'it arrived broken' to damaged and 'I ordered two' to duplicate_purchase."
         rejections:
           - if: slots.return_reason is null
             utter: utter_invalid_return_reason
       - id: confirm_return
         collect: return_confirmation
-        description: "Whether the customer confirms the identified item and return reason: yes or no."
+        description: "Whether the customer confirms the identified item and return reason: yes or no. Treat typed yes/no equivalents the same as the confirmation buttons."
         rejections:
           - if: slots.return_confirmation is null
             utter: utter_invalid_confirmation
@@ -90,7 +92,7 @@ flows:
         action: utter_return_created
       - id: retry_lookup
         collect: retry_order_lookup
-        description: "Whether the customer wants to try order lookup again with different order or fallback details: yes or no."
+        description: "Whether the customer wants to try order lookup again with different order or fallback details: yes or no. Treat typed yes/no equivalents the same as the buttons."
         rejections:
           - if: slots.retry_order_lookup is null
             utter: utter_invalid_confirmation
@@ -98,8 +100,10 @@ flows:
           - if: slots.retry_order_lookup = true
             then:
               - set_slots:
+                  - order_lookup_method: null
                   - order_id: null
                   - fallback_lookup_details: null
+                  - retry_order_lookup: null
                 next: choose_lookup_method
           - else: lookup_handoff
       - id: multiple_order_matches
@@ -111,6 +115,9 @@ flows:
         action: utter_open_return
       - id: past_return_window
         action: utter_past_return_window
+        next: eligibility_handoff
+      - id: restricted_item
+        action: utter_restricted_return_item
         next: eligibility_handoff
       - id: lookup_handoff
         link: human_handoff
@@ -128,13 +135,13 @@ flows:
       It may answer an interruption during a return flow before that flow resumes.
     steps:
       - collect: policy_topic
-        description: "Return-policy topic: refund_timing, return_window, requirements, shipping_label, item_condition, or general_process."
+        description: "Return-policy topic: refund_timing, return_window, requirements, shipping_label, item_condition, or general_process. Map common free text, such as 'when will I get my money' to refund_timing and 'how many days' to return_window."
         rejections:
           - if: slots.policy_topic is null
             utter: utter_ask_policy_topic_again
       - action: utter_return_policy_answer
       - collect: continue_return
-        description: "Whether the customer wants to continue or start a return after the policy answer: yes or no."
+        description: "Whether the customer wants to continue or start a return after the policy answer: yes or no. Treat typed yes/no equivalents the same as the buttons."
         rejections:
           - if: slots.continue_return is null
             utter: utter_invalid_confirmation
@@ -156,7 +163,7 @@ flows:
     steps:
       - action: utter_account_support_redirect
       - collect: continue_without_login
-        description: "Whether the customer wants to continue a return lookup without signing in using an order number, email, phone, SKU, or product name: yes or no."
+        description: "Whether the customer wants to continue a return lookup without signing in using an order number, email, phone, SKU, or product name: yes or no. Treat typed yes/no equivalents the same as the buttons."
         rejections:
           - if: slots.continue_without_login is null
             utter: utter_invalid_confirmation

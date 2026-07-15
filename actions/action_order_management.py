@@ -1,3 +1,4 @@
+import re
 from typing import Any, Dict, List, Text
 
 from rasa_sdk import Action, Tracker
@@ -6,9 +7,23 @@ from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.types import DomainDict
 
 
-class ActionMockLookupOrder(Action):
-    """Mock order lookup; replace once a real MCP server for order-management-mcp is registered."""
+class ValidateFallbackLookupDetails(Action):
+    def name(self) -> Text:
+        return "validate_fallback_lookup_details"
 
+    async def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict) -> List[Dict[Text, Any]]:
+        details = str(tracker.get_slot("fallback_lookup_details") or "").strip()
+        normalized = details.lower()
+        sensitive_terms = ("password", "passcode", "verification code", "one-time code", "otp", "cvv", "security code")
+        card_like_number = bool(re.search(r"(?:\d[ -]?){13,19}", details))
+        if any(term in normalized for term in sensitive_terms) or card_like_number:
+            dispatcher.utter_message(response="utter_sensitive_lookup_details")
+            return [SlotSet("fallback_lookup_details", None)]
+        return [SlotSet("fallback_lookup_details", details)]
+
+
+class ActionMockLookupOrder(Action):
+    # MOCK — replace once a real MCP server for order-management-mcp is registered.
     def name(self) -> Text:
         return "action_mock_lookup_order"
 
@@ -26,8 +41,7 @@ class ActionMockLookupOrder(Action):
 
 
 class ActionMockCheckReturnEligibility(Action):
-    """Mock eligibility check; replace once a real MCP server for order-management-mcp is registered."""
-
+    # MOCK — replace once a real MCP server for order-management-mcp is registered.
     def name(self) -> Text:
         return "action_mock_check_return_eligibility"
 
@@ -49,8 +63,7 @@ class ActionMockCheckReturnEligibility(Action):
 
 
 class ActionMockCreateReturn(Action):
-    """Mock return creation; replace once a real MCP server for order-management-mcp is registered."""
-
+    # MOCK — replace once a real MCP server for order-management-mcp is registered.
     def name(self) -> Text:
         return "action_mock_create_return"
 
