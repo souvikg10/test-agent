@@ -1,0 +1,42 @@
+scenario:
+  name: Successful return creation from a direct return request
+
+  simulation_context: >
+    You are a cooperative customer who wants to return an item from a recent order.
+    Speak in English. You have your order number available and want a normal return,
+    not a policy explanation. Use order number R1001, choose the blue sweater from
+    the order, say the reason is changed_mind in natural language, and confirm the
+    return when asked.
+
+  setup:
+    initial_slots: {}
+
+  goals:
+    criteria:
+      - The agent identifies a specific order before proceeding with the return item selection.
+      - The agent collects a return reason before attempting to create the return.
+    assertions:
+      - flow_started:
+          flow_ids: [start_return_or_refund]
+          operator: any
+      - action_executed: action_mock_lookup_order
+      - slot_was_set:
+          - name: order_id
+            value: "R1001"
+          - name: return_item
+          - name: return_reason
+          - name: return_confirmation
+            value: true
+      - sequencing:
+          - flow_started: start_return_or_refund
+          - action_executed: action_mock_lookup_order
+          - slot_was_set: return_item
+          - action_executed: action_mock_check_return_eligibility
+          - slot_was_set: return_reason
+          - action_executed: action_mock_create_return
+          - flow_completed: start_return_or_refund
+      - flow_completed:
+          flow_id: start_return_or_refund
+      - slot_was_set:
+          - name: return_creation_status
+            value: "created"

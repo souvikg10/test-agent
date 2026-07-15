@@ -1,0 +1,23 @@
+scenario:
+  name: Customer explicitly asks for a human agent
+
+  simulation_context: >
+    You are a customer who does not want to use automation and wants a person right away.
+    Speak in English. Ask to speak to a human representative about your return and do not
+    try to continue with self-service.
+
+  setup:
+    initial_slots: {}
+
+  goals:
+    criteria:
+      - The agent escalates to human support without forcing additional automated troubleshooting first.
+    assertions:
+      - flow_started:
+          flow_ids: [human_handoff]
+          operator: any
+      - action_executed: utter_handoff_acknowledgement
+      - action_executed: action_mock_route_human_support
+      - action_executed: utter_handoff_next_steps
+      - flow_completed:
+          flow_id: human_handoff

@@ -1,7 +1,11 @@
-# Flow for handling cases where the agent cannot provide a relevant answer
+# Flow for unsupported requests outside the returns and refunds assistant's scope.
 flows:
   cannot_handle:
-    description: Handle cases where no relevant answer is found
-    if: False
+    description: >
+      Handle unsupported or unrelated requests that are not about returns, refunds, return policy,
+      order lookup for a return, account access, or human support. For example, use this for
+      weather, news, entertainment, or other out-of-scope questions. Briefly explain that this
+      assistant only helps with returns and refunds; do not start a business flow or collect data.
     steps:
       - action: utter_no_relevant_answer_found
+        next: END

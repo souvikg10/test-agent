@@ -15,9 +15,16 @@ class ValidateFallbackLookupDetails(Action):
         details = str(tracker.get_slot("fallback_lookup_details") or "").strip()
         normalized = details.lower()
         sensitive_terms = ("password", "passcode", "verification code", "one-time code", "otp", "cvv", "security code")
+        refusal_terms = (
+            "no", "nope", "none", "nothing", "not providing", "won't provide",
+            "will not provide", "refuse", "rather not", "don't have", "do not have",
+        )
         card_like_number = bool(re.search(r"(?:\d[ -]?){13,19}", details))
         if any(term in normalized for term in sensitive_terms) or card_like_number:
             dispatcher.utter_message(response="utter_sensitive_lookup_details")
+            return [SlotSet("fallback_lookup_details", None)]
+        # An empty value or refusal is not a usable identifier and must never be stored as lookup data.
+        if not details or normalized in refusal_terms:
             return [SlotSet("fallback_lookup_details", None)]
         return [SlotSet("fallback_lookup_details", details)]
 

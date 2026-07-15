@@ -1,0 +1,34 @@
+scenario:
+  name: Password help request continues into order lookup without login
+
+  simulation_context: >
+    You are a practical customer who cannot sign in but still wants to start a return.
+    Speak in English. Begin by saying you cannot log in and forgot your password. When offered,
+    agree to continue without login. Use order number R1001, choose the blue sweater, say it was
+    the wrong size in natural language, and confirm the return.
+
+  setup:
+    initial_slots: {}
+
+  goals:
+    criteria:
+      - The agent offers a no-login return path after the account-support redirect.
+      - The agent completes the linked return flow without asking for account credentials.
+    assertions:
+      - sequencing:
+          - flow_started: redirect_account_support
+          - action_executed: utter_account_support_redirect
+          - slot_was_set: continue_without_login
+          - flow_started: start_return_or_refund
+          - action_executed: action_mock_lookup_order
+          - action_executed: action_mock_create_return
+          - flow_completed: start_return_or_refund
+      - flow_completed:
+          flow_id: redirect_account_support
+      - slot_was_set:
+          - name: continue_without_login
+            value: true
+          - name: order_id
+            value: "R1001"
+          - name: return_creation_status
+            value: "created"

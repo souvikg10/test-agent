@@ -1,0 +1,33 @@
+scenario:
+  name: User asks policy then changes mind and starts a return
+
+  simulation_context: >
+    You are an undecided customer. Speak in English. First ask how long the return window is.
+    After hearing the policy answer, decide you do want to start a return. Use order number R1001,
+    choose the blue sweater, explain in natural language that it was a duplicate purchase, and
+    confirm the return.
+
+  setup:
+    initial_slots: {}
+
+  goals:
+    criteria:
+      - The agent answers the policy question before switching into the linked return flow.
+      - The agent handles the mid-conversation change of mind without losing the return task.
+    assertions:
+      - sequencing:
+          - flow_started: answer_return_policy_question
+          - action_executed: utter_return_policy_answer
+          - flow_started: start_return_or_refund
+          - action_executed: action_mock_lookup_order
+          - action_executed: action_mock_create_return
+          - flow_completed: start_return_or_refund
+      - slot_was_set:
+          - name: policy_topic
+            value: "return_window"
+          - name: continue_return
+            value: true
+          - name: order_id
+            value: "R1001"
+          - name: return_creation_status
+            value: "created"

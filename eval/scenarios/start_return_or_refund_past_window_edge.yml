@@ -1,0 +1,37 @@
+scenario:
+  name: Return request for an ineligible item past the return window
+
+  simulation_context: >
+    You are a cooperative customer trying to return an item from an older order.
+    Speak in English. Use order number R1002, identify the winter boots from the order,
+    and continue normally. If told the item cannot be returned because the window passed,
+    accept that outcome.
+
+  setup:
+    initial_slots: {}
+
+  goals:
+    criteria:
+      - When the item is outside the return window, the agent does not attempt to create a return.
+      - The agent explains that the request cannot proceed automatically before escalating.
+    assertions:
+      - flow_started:
+          flow_ids: [start_return_or_refund]
+          operator: any
+      - action_executed: action_mock_lookup_order
+      - slot_was_set:
+          - name: order_id
+            value: "R1002"
+          - name: return_item
+          - name: return_eligibility
+            value: "past_window"
+      - action_executed: action_mock_check_return_eligibility
+      - slot_was_not_set:
+          - name: return_reason
+      - flow_started:
+          flow_ids: [human_handoff]
+          operator: any
+      - flow_completed:
+          flow_id: human_handoff
+      - slot_was_not_set:
+          - name: return_creation_status

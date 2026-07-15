@@ -5,8 +5,10 @@ flows:
       Connect the customer with a human support agent when they explicitly ask for a person,
       agent, representative, supervisor, or human support; when order lookup or return creation
       cannot be completed; when eligibility is disputed; or when a request is outside standard
-      return and refund support. Do not require additional automation before escalating.
+      return and refund support. Do not require additional automation before escalating. Once the
+      support request is created, end this escalation and do not resume return data collection.
     steps:
       - action: utter_handoff_acknowledgement
       - action: action_mock_route_human_support
       - action: utter_handoff_next_steps
+        next: END

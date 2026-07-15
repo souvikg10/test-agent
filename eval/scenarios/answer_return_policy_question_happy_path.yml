@@ -1,0 +1,29 @@
+scenario:
+  name: Policy question answered without starting a return
+
+  simulation_context: >
+    You are a concise customer with a simple return-policy question. Speak in English.
+    Ask when refunds are usually issued after a return, listen to the answer, and say
+    you do not want to start a return afterward.
+
+  setup:
+    initial_slots: {}
+
+  goals:
+    criteria:
+      - The agent answers the policy question without trying to collect order-specific return details.
+    assertions:
+      - flow_started:
+          flow_ids: [answer_return_policy_question]
+          operator: any
+      - slot_was_set:
+          - name: policy_topic
+            value: "refund_timing"
+          - name: continue_return
+            value: false
+      - action_executed: utter_return_policy_answer
+      - flow_completed:
+          flow_id: answer_return_policy_question
+      - slot_was_not_set:
+          - name: order_id
+          - name: return_item

@@ -7,6 +7,8 @@ flows:
       Use for requests to send an item back, receive a refund, replace an item, or report an
       item that should be refunded. Verify the order, identify the item, check eligibility,
       collect a reason, and create a return when eligible. Do not use for a policy-only question.
+      If the customer refuses all approved order lookup details, do not approve a refund; route
+      them to human support rather than continuing automated return collection.
     steps:
       - id: choose_lookup_method
         collect: order_lookup_method
@@ -27,7 +29,7 @@ flows:
         next: lookup_order
       - id: collect_fallback_details
         collect: fallback_lookup_details
-        description: "One or more approved order lookup details: email address, phone number, SKU, or product name. Never accept a password, payment card number, or verification code."
+        description: "One or more approved order lookup details: email address, phone number, SKU, or product name. Never accept a blank value, a refusal to provide details, a password, payment card number, or verification code."
         rejections:
           - if: slots.fallback_lookup_details is null
             utter: utter_invalid_fallback_details
@@ -90,6 +92,7 @@ flows:
           - else: creation_handoff
       - id: return_created
         action: utter_return_created
+        next: END
       - id: retry_lookup
         collect: retry_order_lookup
         description: "Whether the customer wants to try order lookup again with different order or fallback details: yes or no. Treat typed yes/no equivalents the same as the buttons."
@@ -111,8 +114,10 @@ flows:
         next: lookup_handoff
       - id: already_refunded
         action: utter_already_refunded
+        next: END
       - id: open_return
         action: utter_open_return
+        next: END
       - id: past_return_window
         action: utter_past_return_window
         next: eligibility_handoff
@@ -133,6 +138,8 @@ flows:
       refund timing, required order information or materials, return labels and shipping, item
       condition, or the general return process. Use this without creating or changing a return.
       It may answer an interruption during a return flow before that flow resumes.
+    persisted_slots:
+      - continue_return
     steps:
       - collect: policy_topic
         description: "Return-policy topic: refund_timing, return_window, requirements, shipping_label, item_condition, or general_process. Map common free text, such as 'when will I get my money' to refund_timing and 'how many days' to return_window."
@@ -141,7 +148,7 @@ flows:
             utter: utter_ask_policy_topic_again
       - action: utter_return_policy_answer
       - collect: continue_return
-        description: "Whether the customer wants to continue or start a return after the policy answer: yes or no. Treat typed yes/no equivalents the same as the buttons."
+        description: "Whether the customer wants to continue or start a return after the policy answer: yes or no. Treat affirmative free text such as 'yes', 'please do', or 'I want a return' as true, and negative free text such as 'no' or 'not now' as false, just like the buttons."
         rejections:
           - if: slots.continue_return is null
             utter: utter_invalid_confirmation

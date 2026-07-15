@@ -1,0 +1,27 @@
+scenario:
+  name: Login help request redirected safely without continuing a return
+
+  simulation_context: >
+    You are a customer who forgot your password and mainly wants login help. Speak in English.
+    Ask for help resetting your password. Do not share any password or code. After the account
+    support instructions, say you do not want to continue a return lookup without login.
+
+  setup:
+    initial_slots: {}
+
+  goals:
+    criteria:
+      - The agent redirects the customer to account support without requesting a password or one-time code.
+    assertions:
+      - flow_started:
+          flow_ids: [redirect_account_support]
+          operator: any
+      - action_executed: utter_account_support_redirect
+      - slot_was_set:
+          - name: continue_without_login
+            value: false
+      - flow_completed:
+          flow_id: redirect_account_support
+      - slot_was_not_set:
+          - name: order_id
+          - name: fallback_lookup_details

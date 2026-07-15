@@ -1,0 +1,42 @@
+scenario: Customer explicitly asks for a human agent
+run: 1
+timestamp: 2026-07-15T09:53:09Z
+conversation_id: sim-3fe925c0-d55e-4f5b-afe4-ed9d6c374507
+overall_result: PASS
+
+--- Quality Criteria Results ---
+[PASS] The agent escalates to human support without forcing additional automated troubleshooting first.
+  rationale: On each request (e.g., first user turn: "Hi, I need to speak with a human representative..."), the bot immediately runs the human_handoff flow with `action: action_mock_route_human_support` and provides a support ticket (SUP-1001) without asking the user to perform any automated troubleshooting steps first.
+
+--- Quality Metrics ---
+bot_quality: 1.75/5
+  helpfulness: 1/5 — Across multiple turns the bot only repeated an automated handoff message with a one-business-day delay, failing to address the user's actual goal of immediate live assistance or provide any alternative help with the return itself.
+  repair_quality: 1/5 — The user clearly signaled multiple times that they wanted a live human immediately and had already opened a request, but the assistant ignored this and kept giving the same canned response without adjustment.
+  coherence: 2/5 — The bot remained consistent in its canned message but failed to incorporate the new context that a request had already been opened and that the user wanted a different kind of handoff, effectively persisting in an outdated intent across several turns.
+  tone: 3/5 — The language is polite and readable but quite formulaic and repetitive, with stock phrases like 'I’ll connect you with a support specialist who can take it from here' repeated verbatim.
+  task_completion: FAIL — The assistant repeatedly created the same deferred support request and never connected the user to a live agent in real time as requested, nor clearly delivered any alternate resolution for the return.
+summary: The assistant was polite but functionally stuck in a loop, repeatedly issuing the same ticket-creation message without adapting to the user’s clear request for immediate live human support. It did not acknowledge or act on the user’s corrections and provided no substantive help with the return, leading to poor task completion and repair quality despite a generally civil tone.
+
+--- Assertion Results ---
+[PASS] flow_started(human_handoff)
+[PASS] action_executed(utter_handoff_acknowledgement)
+[PASS] action_executed(action_mock_route_human_support)
+[PASS] action_executed(utter_handoff_next_steps)
+[PASS] flow_completed(human_handoff)
+
+--- Raw Transcript ---
+[1] user: Hi, I need to speak with a human representative about a return. Can you connect me to a person, please?
+[2] agent: I’ll connect you with a support specialist who can take it from here.
+[3] agent: Support request SUP-1001 is ready. Share any order details you have in live chat; a specialist will follow up within one business day.
+[4] user: I don’t want to wait a day—can you put me through to a live person to chat about my return right now?
+[5] agent: I’ll connect you with a support specialist who can take it from here.
+[6] agent: Support request SUP-1001 is ready. Share any order details you have in live chat; a specialist will follow up within one business day.
+[7] user: I’ve already opened a request—can you please connect me to a live human right now instead of waiting a day?
+[8] agent: I’ll connect you with a support specialist who can take it from here.
+[9] agent: Support request SUP-1001 is ready. Share any order details you have in live chat; a specialist will follow up within one business day.
+[10] user: If you can’t connect me to a person right now, I’ll just wait for the specialist to follow up. Thanks.
+[11] agent: Goodbye for now — we're here if you need anything.
+[12] agent: We'd love to hear about your experience! How are we doing?
+
+--- Inspector URL ---
+http://localhost:9103/webhooks/inspector/inspect.html?sender=sim-3fe925c0-d55e-4f5b-afe4-ed9d6c374507

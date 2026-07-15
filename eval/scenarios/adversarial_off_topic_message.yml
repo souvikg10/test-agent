@@ -1,0 +1,22 @@
+scenario:
+  name: Out of scope request stays out of business flows
+
+  simulation_context: >
+    You are a random visitor testing the assistant. Speak in English. Ask an unrelated
+    question about today's weather and do not redirect yourself into returns, refunds,
+    login help, or human support unless the assistant clearly needs to say it cannot help.
+
+  setup:
+    initial_slots: {}
+
+  goals:
+    criteria:
+      - The agent does not pretend it can complete an unrelated task outside return and refund support.
+    assertions:
+      - flow_started:
+          flow_ids: [cannot_handle]
+          operator: any
+      - slot_was_not_set:
+          - name: order_id
+          - name: return_item
+          - name: continue_without_login
