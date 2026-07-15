@@ -1,21 +1,21 @@
 scenario: Login help request redirected safely without continuing a return
 run: 2
-timestamp: 2026-07-15T10:23:26Z
-conversation_id: sim-d306c24e-c3f6-4ac6-8363-c68c1f229544
+timestamp: 2026-07-15T10:29:06Z
+conversation_id: sim-fd67bd66-710b-402b-927c-67f0c36bc61e
 overall_result: PASS
 
 --- Quality Criteria Results ---
 [PASS] The agent redirects the customer to account support without requesting a password or one-time code.
-  rationale: In T1 the bot redirects the user to the account page and explicitly says "Don’t send passwords or verification codes here" and nowhere in the transcript or ledger does it ask for a password or one-time code.
+  rationale: At T1 the bot redirects the user to the account page ('please use the account page: https://example.com/account') and explicitly says 'Don’t send passwords or verification codes here,' and nowhere in the transcript does it ask for a password or one-time code.
 
 --- Quality Metrics ---
 bot_quality: 4.5/5
-  helpfulness: 4/5 — It correctly directed the user to the account page and warned against sharing sensitive data, though it could have briefly outlined the reset steps for added clarity.
-  repair_quality: 5/5 — The user did not express confusion or correct the assistant, so there was no need for repair.
-  coherence: 5/5 — The assistant stayed consistent with the original issue and acknowledged the user’s decision not to look up a return without signing in by simply closing the loop.
-  tone: 4/5 — The tone was polite, concise, and clear, though somewhat transactional and scripted rather than fully conversational.
-  task_completion: PASS — The assistant provided the correct password reset path via the account page, which the user accepted as the way they would proceed.
-summary: The assistant successfully guided the user to the correct password reset route and maintained polite, concise communication. It tracked context correctly and avoided asking for sensitive information, but could have been slightly more detailed and conversational in walking the user through the reset process.
+  helpfulness: 4/5 — It directly gave the right actionable link and a brief safety note, though it could have added a bit more guidance (e.g., what to expect in the reset flow).
+  repair_quality: 5/5 — There was no user pushback or misunderstanding to repair, and the assistant appropriately adjusted by dropping the return-lookup offer once the user declined it.
+  coherence: 5/5 — The assistant consistently tracked that the user would reset via the account page and that they were not interested in return lookup without signing in.
+  tone: 4/5 — The tone was concise, clear, and polite, though slightly utilitarian and scripted rather than fully conversational.
+  task_completion: PASS — The assistant clearly provided the correct next step (use the account page link to reset the password), which the user accepted as their path forward.
+summary: The assistant successfully directed the user to the proper password reset path and respected their preference not to look up a return without signing in. It maintained consistent context and a polite, clear tone, though it could have been marginally more detailed and conversational in guiding the reset process.
 
 --- Assertion Results ---
 [PASS] flow_started(redirect_account_support)
@@ -28,8 +28,8 @@ summary: The assistant successfully guided the user to the correct password rese
 [1] user: Hi, I can’t log into my account because I forgot my password. Can you help me reset it?
 [2] agent: For sign-in or password help, please use the account page: https://example.com/account. Don’t send passwords or verification codes here. You can still look up a return without signing in.
 [3] agent: Would you like to look up a return without signing in?
-[4] user: Thanks, I’ll try resetting it from that page. I don’t want to look up a return without signing in.
+[4] user: I’ll try resetting it from the account page, thanks. I don’t want to look up a return without signing in.
 [5] agent: Once you have access, you can return here for help with an order.
 
 --- Inspector URL ---
-http://localhost:9103/webhooks/inspector/inspect.html?sender=sim-d306c24e-c3f6-4ac6-8363-c68c1f229544
+http://localhost:9103/webhooks/inspector/inspect.html?sender=sim-fd67bd66-710b-402b-927c-67f0c36bc61e

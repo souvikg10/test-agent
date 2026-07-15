@@ -177,7 +177,8 @@ flows:
         next:
           - if: slots.continue_without_login = true
             then:
-              - link: start_return_or_refund
+              - action: utter_begin_return_without_login
+                next: END
           - else:
               - action: utter_account_support_wrap_up
                 next: END

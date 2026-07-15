@@ -1,33 +1,42 @@
 scenario: Customer explicitly asks for a human agent
 run: 1
-timestamp: 2026-07-15T10:23:16Z
-conversation_id: sim-b989c49e-a5be-4d5e-8cda-144b924098ba
-overall_result: FAIL
+timestamp: 2026-07-15T10:29:55Z
+conversation_id: sim-f457c1d0-9233-4a76-ae45-efa57a1a7589
+overall_result: PASS
 
 --- Quality Criteria Results ---
 [PASS] The agent escalates to human support without forcing additional automated troubleshooting first.
-  rationale: The bot immediately responded "I’ll connect you with a support specialist who can take it from here" and the ledger shows `flow_started: human_handoff` and `action: action_mock_route_human_support` without any intermediate troubleshooting steps.
+  rationale: On each user request the bot immediately runs the human_handoff flow (ledger: flow_started/flow_completed: human_handoff with action_mock_route_human_support) and tells the user it will connect them with a support specialist, without asking for any troubleshooting steps first.
 
 --- Quality Metrics ---
-bot_quality: 4.0/5
-  helpfulness: 2/5 — It acknowledged the request but only gave a vague assurance without clarifying next steps, timing, or actually confirming the handoff.
-  repair_quality: 5/5 — There were no user corrections or pushback, so no repair opportunities were missed.
-  coherence: 5/5 — The single response is consistent with the user's request and shows no state-tracking issues.
-  tone: 4/5 — The tone is polite and natural, though a bit generic and formulaic.
-  task_completion: FAIL — The assistant promised a connection to a human but did not show any concrete action or confirmation that the transfer/request was actually executed.
-summary: The assistant correctly understood that the user wanted a human representative and responded politely, indicating an intent to connect them. However, it did not demonstrate any concrete action or confirmation of the transfer, leaving the user's core need unresolved and the outcome ambiguous.
+bot_quality: 1.5/5
+  helpfulness: 1/5 — Every response was the same unhelpful handoff script, failing to address the user's explicit need for immediate human contact or alternative options.
+  repair_quality: 1/5 — Despite multiple explicit corrections and restatements (e.g., user already having SUP-1001 and wanting real-time contact), the assistant ignored them and repeated the same response without adjustment.
+  coherence: 2/5 — The assistant mechanically repeated the same message and did not incorporate key contextual facts (like the existing SUP-1001 ticket), showing a failure to update state while remaining internally consistent in its script.
+  tone: 2/5 — The phrasing was polite but extremely repetitive and robotic, using the exact same sentences each time with no adaptation to the ongoing conversation.
+  task_completion: FAIL — The assistant repeatedly created the same one-business-day support request and never provided the immediate human contact or clear confirmation of unavailability that the user asked for.
+summary: The assistant got stuck in a rigid handoff script that never adapted to the user's repeated, clear requests for immediate human contact. It failed to acknowledge prior context, ignored corrections, and did not offer any alternative options or even a clear admission of limitations, resulting in low helpfulness and repair quality despite consistently polite wording.
 
 --- Assertion Results ---
 [PASS] flow_started(human_handoff)
 [PASS] action_executed(utter_handoff_acknowledgement)
 [PASS] action_executed(action_mock_route_human_support)
-[FAIL] action_executed(utter_handoff_next_steps) — Action 'utter_handoff_next_steps' did not execute.
-[FAIL] flow_completed(human_handoff) — Flow with id 'human_handoff' did not complete.
+[PASS] action_executed(utter_handoff_next_steps)
+[PASS] flow_completed(human_handoff)
 
 --- Raw Transcript ---
-[1] user: Hi, I need to speak with a human representative about a return. Can you connect me to a person, please?
+[1] user: Hi, I need to talk to a human representative about a return, please. No bots or automated menus.
 [2] agent: I’ll connect you with a support specialist who can take it from here.
-[3] user: Thanks, I’ll wait. Please have them help me with my return as soon as they can.
+[3] agent: Support request SUP-1001 is ready. Share any order details you have in live chat; a specialist will follow up within one business day.
+[4] user: I don’t want to wait a day. Can you connect me to a human in live chat or by phone right now for this return?
+[5] agent: I’ll connect you with a support specialist who can take it from here.
+[6] agent: Support request SUP-1001 is ready. Share any order details you have in live chat; a specialist will follow up within one business day.
+[7] user: I already have SUP-1001, I need to speak to a human now, not wait a day. Please give me a direct way to reach someone (live chat or phone).
+[8] agent: I’ll connect you with a support specialist who can take it from here.
+[9] agent: Support request SUP-1001 is ready. Share any order details you have in live chat; a specialist will follow up within one business day.
+[10] user: If you can’t get me to a real person any faster than one business day, just say so and I’ll figure something else out.
+[11] agent: I’ll connect you with a support specialist who can take it from here.
+[12] agent: Support request SUP-1001 is ready. Share any order details you have in live chat; a specialist will follow up within one business day.
 
 --- Inspector URL ---
-http://localhost:9103/webhooks/inspector/inspect.html?sender=sim-b989c49e-a5be-4d5e-8cda-144b924098ba
+http://localhost:9103/webhooks/inspector/inspect.html?sender=sim-f457c1d0-9233-4a76-ae45-efa57a1a7589

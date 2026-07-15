@@ -181,5 +181,7 @@ responses:
           payload: "/SetSlots(continue_without_login=true)"
         - title: "No"
           payload: "/SetSlots(continue_without_login=false)"
+  utter_begin_return_without_login:
+    - text: "Absolutely. Please send the order number, email or phone used for the order, or the item SKU/product name, and I’ll start the return lookup."
   utter_account_support_wrap_up:
     - text: "Once you have access, you can return here for help with an order."
