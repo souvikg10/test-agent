@@ -2,10 +2,11 @@
 flows:
   cannot_handle:
     description: >
-      Handle unsupported or unrelated requests that are not about returns, refunds, return policy,
-      order lookup for a return, account access, or human support. For example, use this for
-      weather, news, entertainment, or other out-of-scope questions. Briefly explain that this
-      assistant only helps with returns and refunds; do not start a business flow or collect data.
+      MUST start this flow for every unsupported or unrelated request, rather than replying with
+      generic chitchat or a standalone refusal. This includes questions about weather, news,
+      entertainment, sports, travel, coding, and any topic that is not returns, refunds, return
+      policy, return order lookup, account access, or human support. Briefly state that this
+      assistant only helps with returns and refunds. Do not start a business flow or collect data.
     steps:
       - action: utter_no_relevant_answer_found
         next: END

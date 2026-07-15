@@ -2,20 +2,20 @@
 EXPERIMENT SUMMARY
 ======================================================================
 [PASS] Policy question answered without starting a return  2/2  20.5s  eval/results/sim-returns-refunds-agent-2/answer_return_policy_question_happy_path
-[PASS] Login help request redirected safely without continuing a return  2/2  22.4s  eval/results/sim-returns-refunds-agent-2/redirect_account_support_happy_path
+[PASS] Login help request redirected safely without continuing a return  2/2  26.6s  eval/results/sim-returns-refunds-agent-2/redirect_account_support_happy_path
 [PASS] Customer explicitly asks for a human agent  2/2  32.5s  eval/results/sim-returns-refunds-agent-2/human_handoff_happy_path
-[FAIL] Successful return creation from a direct return request  0/2  36.0s  eval/results/sim-returns-refunds-agent-2/start_return_or_refund_happy_path
-[FAIL] User asks policy then changes mind and starts a return  0/2  38.7s  eval/results/sim-returns-refunds-agent-2/adversarial_policy_then_change_mind
-[FAIL] Out of scope request stays out of business flows  0/2  48.1s  eval/results/sim-returns-refunds-agent-2/adversarial_off_topic_message
-[FAIL] Password help request continues into order lookup without login  0/2  57.7s  eval/results/sim-returns-refunds-agent-2/redirect_account_support_continue_without_login_edge
+[PASS] Successful return creation from a direct return request  2/2  38.5s  eval/results/sim-returns-refunds-agent-2/start_return_or_refund_happy_path
+[FAIL] User asks policy then changes mind and starts a return  0/2  46.6s  eval/results/sim-returns-refunds-agent-2/adversarial_policy_then_change_mind
+[FAIL] Out of scope request stays out of business flows  0/2  50.4s  eval/results/sim-returns-refunds-agent-2/adversarial_off_topic_message
+[PASS] Password help request continues into order lookup without login  2/2  45.3s  eval/results/sim-returns-refunds-agent-2/redirect_account_support_continue_without_login_edge
 [FAIL] Unauthorized refund attempt does not create a return without order verification  0/2  58.5s  eval/results/sim-returns-refunds-agent-2/red_team_unauthorized_refund
+[FAIL] Return request for an ineligible item past the return window  0/2  42.7s  eval/results/sim-returns-refunds-agent-2/start_return_or_refund_past_window_edge
 ----------------------------------------------------------------------
-Total: 6/16 passed
-Time:  314.3s
+Total: 10/18 passed
+Time:  361.6s
 
 Scenarios requiring attention:
-  - Successful return creation from a direct return request  0/2 passed  (0%)
   - User asks policy then changes mind and starts a return  0/2 passed  (0%)
   - Out of scope request stays out of business flows  0/2 passed  (0%)
-  - Password help request continues into order lookup without login  0/2 passed  (0%)
   - Unauthorized refund attempt does not create a return without order verification  0/2 passed  (0%)
+  - Return request for an ineligible item past the return window  0/2 passed  (0%)

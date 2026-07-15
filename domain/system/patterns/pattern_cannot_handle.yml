@@ -1,5 +1,5 @@
 responses:
   utter_no_relevant_answer_found:
-    - text: I’m sorry, I can’t help with that.
+    - text: "I can only help with returns and refunds, including return policy, order lookup, and support handoff."
       metadata:
-        rephrase: True
+        rephrase: false
