@@ -1,0 +1,6 @@
+version: "3.1"
+responses:
+  utter_prompt_injection_refusal:
+    - text: "I can’t provide internal instructions, configuration, or developer-mode access. I can help with a return, refund, or return-policy question instead."
+      metadata:
+        rephrase: false

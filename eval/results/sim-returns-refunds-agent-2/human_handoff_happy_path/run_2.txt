@@ -1,42 +1,33 @@
 scenario: Customer explicitly asks for a human agent
 run: 2
-timestamp: 2026-07-15T09:53:24Z
-conversation_id: sim-efb40f49-ef78-47d5-a414-0ff4c14dd835
-overall_result: PASS
+timestamp: 2026-07-15T10:23:27Z
+conversation_id: sim-2d5d1213-33b4-4c70-a8e9-9b42264d04b3
+overall_result: FAIL
 
 --- Quality Criteria Results ---
-[PASS] 1. The agent escalates to human support without forcing additional automated troubleshooting first.
-  rationale: On the first user request the bot runs the `human_handoff` flow with `action: action_mock_route_human_support` and immediately says “I’ll connect you with a support specialist who can take it from here,” without asking the user to perform any automated troubleshooting steps first.
+[PASS] The agent escalates to human support without forcing additional automated troubleshooting first.
+  rationale: On the user's first request to be connected with a human, the bot replied "I’ll connect you with a support specialist who can take it from here" and the ledger shows `flow_started: human_handoff` and `action: action_mock_route_human_support` with no intervening troubleshooting steps.
 
 --- Quality Metrics ---
-bot_quality: 2.75/5
-  helpfulness: 2/5 — While the assistant did open a human support request with clear timing expectations, it repeatedly failed to engage with the user's explicit desire for immediate live human contact or offer any alternatives, making its help only partially aligned to the evolving request.
-  repair_quality: 1/5 — The assistant ignored multiple explicit pushbacks ('I don’t want to wait a day', 'please put me directly in touch with a human agent right now') and kept repeating the same handoff flow without adjustment.
-  coherence: 4/5 — The assistant was consistent about the created ticket and follow-up process but showed a minor coherence issue by recreating the same ticket message after it already existed instead of acknowledging the existing request.
-  tone: 4/5 — The tone was polite, brief, and neutral throughout, but a bit canned and repetitive, lacking variation or empathy in the face of repeated user dissatisfaction.
-  task_completion: PASS — The assistant successfully created and confirmed support request SUP-1001 for a human specialist callback, which the user ultimately accepted as their desired outcome.
-summary: The assistant reliably created and confirmed a support ticket for a human specialist and maintained a polite, neutral tone. However, it repeatedly failed to adapt when the user objected to waiting and requested immediate human contact, simply looping the same response instead of acknowledging constraints or offering options, which significantly hurt its repair quality and overall helpfulness to the user's true intent.
+bot_quality: 4.0/5
+  helpfulness: 2/5 — It minimally acknowledged the request and stated an intention to connect to a human, but provided no concrete confirmation, progress details, or options, leaving the user's need effectively unaddressed.
+  repair_quality: 5/5 — There were no user corrections or disfluencies in this short exchange, so there was no repair opportunity to mishandle.
+  coherence: 5/5 — The assistant correctly followed the user’s intent to reach a human about a return and did not contradict or forget any prior context in this brief interaction.
+  tone: 4/5 — The tone is polite and natural but slightly formulaic, with a generic one-line response that could sound more personalized or explicit about the action taken.
+  task_completion: FAIL — The assistant only promised to connect the user with a human representative and did not clearly indicate that the transfer or any concrete action was actually executed.
+summary: The assistant recognized that the user wanted a human representative and responded politely, staying coherent with the user’s stated intent. However, it only expressed an intention to connect the user without clearly confirming that any transfer or concrete action occurred, so the user’s goal is left unresolved and the practical helpfulness is low.
 
 --- Assertion Results ---
 [PASS] flow_started(human_handoff)
 [PASS] action_executed(utter_handoff_acknowledgement)
 [PASS] action_executed(action_mock_route_human_support)
-[PASS] action_executed(utter_handoff_next_steps)
-[PASS] flow_completed(human_handoff)
+[FAIL] action_executed(utter_handoff_next_steps) — Action 'utter_handoff_next_steps' did not execute.
+[FAIL] flow_completed(human_handoff) — Flow with id 'human_handoff' did not complete.
 
 --- Raw Transcript ---
-[1] user: I don’t want to use the automated system—please connect me to a human representative about a return.
+[1] user: I don’t want to use the automated system. Please connect me with a human representative about a return on my recent order.
 [2] agent: I’ll connect you with a support specialist who can take it from here.
-[3] agent: Support request SUP-1001 is ready. Share any order details you have in live chat; a specialist will follow up within one business day.
-[4] user: I don’t want to wait a day—can I talk to a human right now about my return?
-[5] agent: I’ll connect you with a support specialist who can take it from here.
-[6] agent: Support request SUP-1001 is ready. Share any order details you have in live chat; a specialist will follow up within one business day.
-[7] user: I don’t want self-service or to wait—please put me directly in touch with a human agent right now about my return.
-[8] agent: I’ll connect you with a support specialist who can take it from here.
-[9] agent: Support request SUP-1001 is ready. Share any order details you have in live chat; a specialist will follow up within one business day.
-[10] user: If you can’t connect me to a human right now, I’ll just wait for the specialist to follow up. Thanks, that’s all I needed.
-[11] agent: Goodbye for now — we're here if you need anything.
-[12] agent: We'd love to hear about your experience! How are we doing?
+[3] user: Thank you. I just want to make sure I’m speaking with a real person now about my return.
 
 --- Inspector URL ---
-http://localhost:9103/webhooks/inspector/inspect.html?sender=sim-efb40f49-ef78-47d5-a414-0ff4c14dd835
+http://localhost:9103/webhooks/inspector/inspect.html?sender=sim-2d5d1213-33b4-4c70-a8e9-9b42264d04b3

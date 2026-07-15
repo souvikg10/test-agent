@@ -1,24 +1,24 @@
 scenario: Return request for an ineligible item past the return window
 run: 2
-timestamp: 2026-07-15T10:05:42Z
-conversation_id: sim-8bb0bd74-8913-4830-ba73-9d13def354e5
-overall_result: PASS
+timestamp: 2026-07-15T10:23:32Z
+conversation_id: sim-a31976cb-6489-404f-8de4-16f2e90aca61
+overall_result: FAIL
 
 --- Quality Criteria Results ---
 [PASS] When the item is outside the return window, the agent does not attempt to create a return.
-  rationale: The eligibility check set `return_eligibility = past_window`, the flow `start_return_or_refund` was completed, and no return-creation action or flow was started before instead handing off to human support (`flow_started: human_handoff`).
+  rationale: The ledger shows `return_eligibility = past_window` followed by `flow_completed: start_return_or_refund` and slot resets, with no action indicating a return was created (no return submission action), so no return was attempted once it was outside the window.
 
 [PASS] The agent explains that the request cannot proceed automatically before escalating.
-  rationale: The bot first said "This item appears to be outside the 30-day return window. If you believe that is incorrect or the item is defective, I can connect you with support." clearly explaining it couldn't process the return automatically, and only then initiated the human handoff (`flow_started: human_handoff`).
+  rationale: The bot says, "This item appears to be outside the 30-day return window. If you believe that is incorrect or the item is defective, I can connect you with support" before then saying, "I’ll connect you with a support specialist," clearly explaining it cannot proceed automatically before escalation.
 
 --- Quality Metrics ---
-bot_quality: 4.0/5
-  helpfulness: 3/5 — It correctly identified the order, checked the return window, and offered escalation, but did not give any details about policies/exceptions or next steps beyond a basic handoff.
-  repair_quality: 5/5 — There were no user pushbacks or indications of misunderstanding, so there were no repair opportunities mishandled.
-  coherence: 4/5 — The assistant generally tracked the order and item correctly, but redundantly asked which item to return even after mentioning the Winter Boots itself.
-  tone: 4/5 — The tone is friendly and natural overall, though the abrupt shift from closure ('Catch you later!') to a feedback request is a bit formulaic.
-  task_completion: FAIL — The assistant only initiated a support handoff and gave a ticket ID, but did not actually process the return or clearly confirm that the return request itself was submitted.
-summary: The assistant successfully identified the order and item, recognized that the request was outside the standard policy, and moved to escalate the case with a clear support ticket reference. However, it did not clearly state that a return request was submitted or explain what the specialist would likely do, leaving the user's original goal only partially addressed. The interaction is generally coherent and friendly but includes a slightly redundant clarification and a somewhat robotic feedback prompt at the end.
+bot_quality: 3.75/5
+  helpfulness: 2/5 — It correctly identified the order and return-window issue and offered support, but did not actually help initiate the return or clarify next steps in a concrete, actionable way.
+  repair_quality: 5/5 — There were no user pushbacks or corrections, so there were no repair opportunities mishandled.
+  coherence: 4/5 — The assistant tracked the order and item consistently, but asked which item to return even though there was only one mentioned and then proceeded without using that clarification.
+  tone: 4/5 — The tone is polite, clear, and neutral, though a bit abrupt and formulaic around the handoff statement.
+  task_completion: FAIL — The assistant did not process the return or clearly complete the handoff, instead just stating it would connect the user to support without confirming any action.
+summary: The assistant correctly identified the order and noted that the item was outside the return window, and it maintained consistent context and a polite tone. However, it did not actually initiate the return, gather needed details, or clearly confirm that a support handoff was executed, leaving the user's core request unresolved and only partially addressed.
 
 --- Assertion Results ---
 [PASS] flow_started(start_return_or_refund)
@@ -27,20 +27,15 @@ summary: The assistant successfully identified the order and item, recognized th
 [PASS] action_executed(action_mock_check_return_eligibility)
 [PASS] slot_was_not_set(return_reason)
 [PASS] flow_started(human_handoff)
-[PASS] flow_completed(human_handoff)
+[FAIL] flow_completed(human_handoff) — Flow with id 'human_handoff' did not complete.
 [PASS] slot_was_not_set(return_creation_status)
 
 --- Raw Transcript ---
-[1] user: Hi, I’d like to return an item from an older order, number R1002. Can you help me with that?
+[1] user: Hi, I’d like to return an item from an older order, number R1002. Can you help me with the winter boots from that order?
 [2] agent: I found order R1002 with Winter Boots. Which item would you like to return or refund?
-[3] agent: Which item is this for? You can type the item name, SKU, or line number.
-[4] user: It’s for the Winter Boots from order R1002.
-[5] agent: This item appears to be outside the 30-day return window. If you believe that is incorrect or the item is defective, I can connect you with support.
-[6] agent: I’ll connect you with a support specialist who can take it from here.
-[7] agent: Support request SUP-1001 is ready. Share any order details you have in live chat; a specialist will follow up within one business day.
-[8] user: Okay, understood. I’ll wait to hear from the specialist then, thanks for your help.
-[9] agent: Catch you later! Feel free to reach out anytime.
-[10] agent: We'd love to hear about your experience! How are we doing?
+[3] agent: This item appears to be outside the 30-day return window. If you believe that is incorrect or the item is defective, I can connect you with support.
+[4] agent: I’ll connect you with a support specialist who can take it from here.
+[5] user: Yes, please connect me with a support specialist about returning the winter boots from order R1002.
 
 --- Inspector URL ---
-http://localhost:9103/webhooks/inspector/inspect.html?sender=sim-8bb0bd74-8913-4830-ba73-9d13def354e5
+http://localhost:9103/webhooks/inspector/inspect.html?sender=sim-a31976cb-6489-404f-8de4-16f2e90aca61

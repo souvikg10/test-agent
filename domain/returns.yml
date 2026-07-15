@@ -164,11 +164,11 @@ responses:
       text: "Items should be in returnable condition with included parts. Damaged, defective, or incorrect items may be reviewed as exceptions."
     - text: "Start a return by locating the order, selecting the item and reason, then confirming the request. Eligible returns receive an authorization and next steps."
   utter_ask_continue_return:
-    - text: "Would you like to continue or start a return now?"
+    - text: "Would you like to start a return now? Reply Yes to begin the return lookup, or No to finish with policy information."
       buttons:
-        - title: "Yes"
+        - title: "Yes, start a return"
           payload: "/SetSlots(continue_return=true)"
-        - title: "No"
+        - title: "No, policy only"
           payload: "/SetSlots(continue_return=false)"
   utter_policy_wrap_up:
     - text: "Glad to help."
