@@ -1,0 +1,27 @@
+# eval/conftest.yml — simulation configuration for Rasa's evaluate_agent /
+# validate_scenario MCP tools (lib/agents/simulator-prompts.ts). Provisioned
+# here rather than authored interactively per-project: autopilot runs
+# unattended, so there's no one to confirm a freshly-generated config the
+# way the interactive skill (rasa-simulating-conversations.md) expects.
+# Matches the model group already used by this project's own pipeline in
+# config.yml/endpoints.yml, rather than introducing a second provider.
+
+# LLM used to drive the user simulator (generates user turns)
+simulation:
+  llm:
+    provider: openai
+    model: gpt-5.1-2025-11-13
+    timeout: 30
+    reasoning_effort: "none"
+    cache:
+      no-cache: true
+
+# LLM used to evaluate success criteria and quality metrics (LLM judge)
+evaluation:
+  llm:
+    provider: openai
+    model: gpt-5.1-2025-11-13
+    timeout: 30
+    reasoning_effort: "none"
+    cache:
+      no-cache: true

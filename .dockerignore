@@ -1,0 +1,6 @@
+.git/
+.rasa/
+models/
+__pycache__/
+*.pyc
+.local-test-endpoints.yml
